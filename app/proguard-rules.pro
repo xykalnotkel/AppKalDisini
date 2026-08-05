@@ -1,9 +1,5 @@
-# Retrofit
--keepattributes Signature
--keepattributes *Annotation*
--keep class com.siputzx.app.data.api.** { *; }
--keepclassmembers class com.siputzx.app.data.api.** { *; }
-
-# Gson
--keep class com.google.gson.** { *; }
--keepattributes EnclosingMethod
+# OkHttp / JSON
+-keep class okhttp3.** { *; }
+-keep class org.json.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
