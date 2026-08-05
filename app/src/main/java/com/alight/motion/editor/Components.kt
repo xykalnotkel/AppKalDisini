@@ -119,8 +119,8 @@ fun formatTime(s: Float) = "%02d:%02d.%02d".format((s / 60).toInt(), (s % 60).to
                 Row(Modifier.horizontalScroll(rememberScrollState())) { for (i in 0..dur.toInt()) Text("${i}s", color = Color(0xFF4A4A50), fontSize = 7.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.width(pps.dp).padding(start = 1.dp)) }
                 Box(Modifier.offset(x = px.dp).width(2.dp).fillMaxHeight().background(Color(0xFFFF4444)))
             }
-            LazyColumn { items(tracks.size) { i -> val t = tracks[i]
-                Box(Modifier.fillMaxWidth().height(48.dp).background(if (i % 2 == 0) Color(0xFF14141A) else Color(0xFF1A1A20))) {
+            LazyColumn { items(tracks) { t ->
+                Box(Modifier.fillMaxWidth().height(48.dp).background(if (tracks.indexOf(t) % 2 == 0) Color(0xFF14141A) else Color(0xFF1A1A20))) {
                     Text(t.name, color = Color(0xFF4A4A50), fontSize = 8.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp))
                     Row(Modifier.horizontalScroll(rememberScrollState())) {
                         t.layers.forEach { l ->
