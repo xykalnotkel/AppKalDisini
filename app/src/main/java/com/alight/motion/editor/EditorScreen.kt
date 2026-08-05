@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import com.alight.motion.engine.keyframe.KeyframeEngine
 import com.alight.motion.engine.export.ExportEngine
-import com.alight.motion.engine.export.ExpProg
 import com.alight.motion.io.ProjectIO
 import com.alight.motion.model.*
 import kotlinx.coroutines.*
@@ -56,7 +55,7 @@ enum class Tool{SELECT,PEN,SHAPE,TEXT,HAND}
         Surface(color=Color(0xFF202025),shadowElevation=4.dp){Row(Modifier.fillMaxWidth().height(44.dp).padding(horizontal=6.dp),verticalAlignment=Alignment.CenterVertically){
             IconButton({},Modifier.size(32.dp)){Icon(Icons.Filled.Menu,null,tint=Color(0xFFAAAAAA),modifier=Modifier.size(18.dp))}
             Column(Modifier.padding(horizontal=4.dp).weight(1f)){Text(project.name,color=Color(0xFFE0E0E0),fontSize=13.sp,fontWeight=FontWeight.SemiBold);Text("${project.width}x${project.height} ${project.fps}fps",color=Color(0xFF666670),fontSize=10.sp,fontFamily=FontFamily.Monospace)}
-            Tool.entries.forEach{t->IconButton({tool=t},Modifier.size(30.dp)){Icon(when(t){Tool.SELECT->Icons.Filled.NearMe;Tool.PEN->Icons.Filled.Draw;Tool.SHAPE->Icons.Filled.Shapes;Tool.TEXT->Icons.Filled.TextFields;Tool.HAND->Icons.Filled.PanTool},t.name,tint=if(tool==t)Color(0xFF5C9CFF)else Color(0xFF6A6A72),modifier=Modifier.size(15.dp))}}
+            Tool.entries.forEach{t->IconButton({tool=t},Modifier.size(30.dp)){Icon(when(t){Tool.SELECT->Icons.Filled.NearMe;Tool.PEN->Icons.Filled.Draw;Tool.SHAPE->Icons.Filled.AutoAwesome;Tool.TEXT->Icons.Filled.TextFields;Tool.HAND->Icons.Filled.PanTool},t.name,tint=if(tool==t)Color(0xFF5C9CFF)else Color(0xFF6A6A72),modifier=Modifier.size(15.dp))}}
             VerticalDivider(Modifier.height(20.dp).padding(horizontal=4.dp),color=Color(0xFF2A2A30))
             EditorPanel.entries.forEach{p->TextButton({panel=p},Modifier.height(28.dp),contentPadding=PaddingValues(horizontal=6.dp)){Text(p.label,fontSize=9.sp,fontFamily=FontFamily.Monospace,letterSpacing=1.sp,color=if(panel==p)Color.White else Color(0xFF555560))}}
             IconButton({showImport=true},Modifier.size(28.dp)){Icon(Icons.Filled.Add,null,tint=Color(0xFF5C9CFF),modifier=Modifier.size(18.dp))}
@@ -75,7 +74,7 @@ enum class Tool{SELECT,PEN,SHAPE,TEXT,HAND}
                             Text(track.name,color=Color(0xFFB0B0B8),fontSize=11.sp,fontWeight=FontWeight.Medium,modifier=Modifier.weight(1f))
                             Icon(if(track.isLocked)Icons.Filled.Lock else Icons.Filled.LockOpen,null,tint=Color(0xFF5A5A60),modifier=Modifier.size(10.dp))}
                         track.layers.forEach{l->Row(Modifier.fillMaxWidth().padding(start=20.dp,end=4.dp).clip(RoundedCornerShape(3.dp)).background(if(l.id==selId)Color(0xFF2A2A44)else Color.Transparent).clickable{selId=l.id}.padding(horizontal=6.dp,vertical=4.dp),verticalAlignment=Alignment.CenterVertically){
-                            Icon(when(l){is VideoLayer->Icons.Filled.Videocam;is ImageLayer->Icons.Filled.Image;is TextLayer->Icons.Filled.TextFields;is ShapeLayer->Icons.Filled.Shapes;is NullLayer->Icons.Filled.Block;is CameraLayer->Icons.Filled.Videocam;is AdjustmentLayer->Icons.Filled.Tune;is GroupLayer->Icons.Filled.Folder;is FigmaLayer->Icons.Filled.DesignServices;else->Icons.Filled.Layers},null,tint=if(l.id==selId)Color(0xFF8899FF)else Color(0xFF7A7A80),modifier=Modifier.size(10.dp));Spacer(Modifier.width(4.dp))
+                            Icon(when(l){is VideoLayer->Icons.Filled.Videocam;is ImageLayer->Icons.Filled.Image;is TextLayer->Icons.Filled.TextFields;is ShapeLayer->Icons.Filled.AutoAwesome;is NullLayer->Icons.Filled.Block;is CameraLayer->Icons.Filled.Videocam;is AdjustmentLayer->Icons.Filled.Tune;is GroupLayer->Icons.Filled.Folder;else->Icons.Filled.Layers},null,tint=if(l.id==selId)Color(0xFF8899FF)else Color(0xFF7A7A80),modifier=Modifier.size(10.dp));Spacer(Modifier.width(4.dp))
                             Text(l.name,color=if(l.id==selId)Color.White else Color(0xFF999999),fontSize=10.sp,maxLines=1,modifier=Modifier.weight(1f));Text("%.1fs".format(l.duration),color=Color(0xFF4A4A50),fontSize=7.sp,fontFamily=FontFamily.Monospace)}}}}
                     item{Spacer(Modifier.height(8.dp))}}
             }}
@@ -103,8 +102,7 @@ enum class Tool{SELECT,PEN,SHAPE,TEXT,HAND}
         }
 
         // TIMELINE BOTTOM
-        if(panel==EditorPanel.TIMELINE)TimelinePanel(project.tracks,project.duration,time,selId,Modifier.height(140.dp)){selId=it}
+        if(panel==EditorPanel.TIMELINE)TimelinePanel(project.tracks,project.duration,time,selId,Modifier.height(140.dp)){selId = it}
         PlaybackBar(time,project.duration,playing){playing=!playing}
     }
 }
-fun formatTime(s:Float)="%02d:%02d.%02d".format((s/60).toInt(),(s%60).toInt(),((s%1)*100).toInt())
