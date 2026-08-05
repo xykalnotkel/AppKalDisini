@@ -94,7 +94,7 @@ fun AppNavigation(viewModel: MainViewModel) {
                     viewModel = viewModel,
                     onCategoryClick = { category ->
                         viewModel.selectCategory(category)
-                        navController.navigate("endpoints/${category.id}")
+                        navController.navigate("endpoints/${category.tag}")
                     }
                 )
             }
@@ -103,7 +103,7 @@ fun AppNavigation(viewModel: MainViewModel) {
                     viewModel = viewModel,
                     onCategoryClick = { category ->
                         viewModel.selectCategory(category)
-                        navController.navigate("endpoints/${category.id}")
+                        navController.navigate("endpoints/${category.tag}")
                     }
                 )
             }

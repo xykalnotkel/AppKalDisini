@@ -22,96 +22,82 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
 import com.siputzx.app.data.model.*
 import com.siputzx.app.ui.theme.*
+import com.siputzx.app.viewmodel.EndpointResult
 import com.siputzx.app.viewmodel.MainViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EndpointListScreen(
     categoryId: String,
     viewModel: MainViewModel,
     onBack: () -> Unit
 ) {
-    val category = viewModel.categories.find { it.id == categoryId } ?: return
-    val catColor = CategoryColors[category.id] ?: Accent
-    val endpointStates by viewModel.endpointStates.collectAsState()
-    var selectedEndpoint by remember { mutableStateOf<EndpointDef?>(null) }
-    var paramValues by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    val cat = viewModel.categories.value.find { it.tag == categoryId }
+    if (cat == null) { onBack(); return }
 
-    if (selectedEndpoint != null) {
-        EndpointDetailSheet(
-            endpoint = selectedEndpoint!!,
-            categoryColor = catColor,
-            state = endpointStates[selectedEndpoint!!.id],
-            paramValues = paramValues,
-            onParamChange = { key, value ->
-                paramValues = paramValues + (key to value)
-            },
-            onExecute = {
-                viewModel.callEndpoint(selectedEndpoint!!.id, paramValues)
-            },
+    val catColor = CategoryColors[cat.tag.lowercase()] ?: Accent
+    val results by viewModel.endpointResult.collectAsState()
+    var selected by remember { mutableStateOf<EndpointInfo?>(null) }
+    var params by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+
+    if (selected != null) {
+        EndpointDetail(
+            ep = selected!!,
+            color = catColor,
+            result = results[selected!!.id],
+            params = params,
+            onParam = { k, v -> params = params + (k to v) },
+            onExec = { viewModel.executeEndpoint(selected!!, params) },
             onClose = {
-                viewModel.clearEndpointState(selectedEndpoint!!.id)
-                selectedEndpoint = null
-                paramValues = emptyMap()
+                viewModel.clearResult(selected!!.id)
+                selected = null
+                params = emptyMap()
             }
         )
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Category Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.horizontalGradient(listOf(catColor, catColor.copy(alpha = 0.7f)))
-                )
-                .padding(24.dp)
-        ) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, "Back", tint = TextPrimary)
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            category.name,
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = TextPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            "${category.endpointCount} endpoints available",
-                            color = TextPrimary.copy(alpha = 0.8f),
-                            fontSize = 14.sp
-                        )
-                    }
+    Column(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxWidth().background(Brush.horizontalGradient(listOf(catColor, catColor.copy(alpha = 0.7f)))).padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onBack) { Icon(Icons.Filled.ArrowBack, null, tint = TextPrimary) }
+                Spacer(Modifier.width(8.dp))
+                Column {
+                    Text(cat.tag, style = MaterialTheme.typography.headlineLarge, color = TextPrimary, fontWeight = FontWeight.Bold)
+                    Text("${cat.count} endpoints", color = TextPrimary.copy(alpha = 0.8f), fontSize = 13.sp)
                 }
             }
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(category.endpoints) { endpoint ->
-                val state = endpointStates[endpoint.id]
-                EndpointCard(
-                    endpoint = endpoint,
-                    categoryColor = catColor,
-                    isLoading = state?.isLoading == true,
-                    hasResponse = state?.response != null,
-                    hasError = state?.error != null,
-                    onClick = {
-                        selectedEndpoint = endpoint
-                        paramValues = endpoint.params.associate { it.key to it.defaultValue }
+        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(cat.endpoints) { ep ->
+                val r = results[ep.id]
+                Card(
+                    Modifier.fillMaxWidth().clickable {
+                        selected = ep
+                        params = ep.params.associate { it.name to (it.example?.toString() ?: it.schema?.example?.toString() ?: "") }
+                    },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceCard)
+                ) {
+                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.clip(RoundedCornerShape(6.dp)).background(catColor.copy(alpha = 0.15f)).padding(horizontal = 8.dp, vertical = 4.dp)) {
+                            Text("GET", color = catColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(ep.summary, color = TextPrimary, fontWeight = FontWeight.Medium, fontSize = 14.sp, maxLines = 1)
+                            Text(ep.path, color = TextMuted, fontSize = 11.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
+                        }
+                        when {
+                            r?.loading == true -> CircularProgressIndicator(Modifier.size(18.dp), color = catColor, strokeWidth = 2.dp)
+                            r?.success == true -> Icon(Icons.Filled.CheckCircle, null, tint = Green, modifier = Modifier.size(18.dp))
+                            r?.error != null -> Icon(Icons.Filled.Error, null, tint = Orange, modifier = Modifier.size(18.dp))
+                            else -> Icon(Icons.Filled.PlayArrow, null, tint = catColor, modifier = Modifier.size(22.dp))
+                        }
                     }
-                )
+                }
             }
             item { Spacer(Modifier.height(16.dp)) }
         }
@@ -119,221 +105,96 @@ fun EndpointListScreen(
 }
 
 @Composable
-fun EndpointCard(
-    endpoint: EndpointDef,
-    categoryColor: androidx.compose.ui.graphics.Color,
-    isLoading: Boolean,
-    hasResponse: Boolean,
-    hasError: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceCard)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Method badge
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(categoryColor.copy(alpha = 0.15f))
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            ) {
-                Text("GET", color = categoryColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(endpoint.name, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                Text(
-                    endpoint.path,
-                    color = TextMuted,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
-                    maxLines = 1
-                )
-            }
-
-            when {
-                isLoading -> CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = categoryColor,
-                    strokeWidth = 2.dp
-                )
-                hasResponse -> Icon(Icons.Filled.CheckCircle, null, tint = Green, modifier = Modifier.size(20.dp))
-                hasError -> Icon(Icons.Filled.Error, null, tint = Orange, modifier = Modifier.size(20.dp))
-                else -> Icon(Icons.Filled.PlayArrow, null, tint = categoryColor, modifier = Modifier.size(24.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun EndpointDetailSheet(
-    endpoint: EndpointDef,
-    categoryColor: androidx.compose.ui.graphics.Color,
-    state: com.siputzx.app.viewmodel.EndpointUiState?,
-    paramValues: Map<String, String>,
-    onParamChange: (String, String) -> Unit,
-    onExecute: () -> Unit,
+fun EndpointDetail(
+    ep: EndpointInfo,
+    color: androidx.compose.ui.graphics.Color,
+    result: EndpointResult?,
+    params: Map<String, String>,
+    onParam: (String, String) -> Unit,
+    onExec: () -> Unit,
     onClose: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.horizontalGradient(listOf(categoryColor, categoryColor.copy(alpha = 0.7f))))
-                .padding(20.dp)
-        ) {
+    Column(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxWidth().background(Brush.horizontalGradient(listOf(color, color.copy(alpha = 0.7f)))).padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onClose) {
-                    Icon(Icons.Filled.ArrowBack, "Close", tint = TextPrimary)
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(endpoint.name, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text(endpoint.path, color = TextPrimary.copy(alpha = 0.7f), fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                IconButton(onClose) { Icon(Icons.Filled.ArrowBack, null, tint = TextPrimary) }
+                Column(Modifier.weight(1f)) {
+                    Text(ep.summary, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(ep.path, color = TextPrimary.copy(alpha = 0.7f), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
                 }
             }
         }
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            // Description
-            Text(endpoint.description, color = TextSecondary, fontSize = 14.sp)
-            Spacer(Modifier.height(20.dp))
-
-            // Parameters
-            if (endpoint.params.isNotEmpty()) {
-                Text("Parameters", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                Spacer(Modifier.height(12.dp))
-
-                endpoint.params.forEach { param ->
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
+            if (ep.params.isNotEmpty()) {
+                Text("Parameters", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                Spacer(Modifier.height(10.dp))
+                ep.params.forEach { p ->
                     OutlinedTextField(
-                        value = paramValues[param.key] ?: param.defaultValue,
-                        onValueChange = { onParamChange(param.key, it) },
-                        label = { Text(param.label, color = TextSecondary) },
-                        placeholder = { Text(param.placeholder, color = TextMuted) },
+                        value = params[p.name] ?: "",
+                        onValueChange = { onParam(p.name, it) },
+                        label = { Text("${p.name}${if (p.required) " *" else ""}", color = TextSecondary) },
+                        placeholder = { Text(p.description ?: "", color = TextMuted) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = categoryColor,
-                            unfocusedBorderColor = SurfaceCardLight,
-                            focusedContainerColor = SurfaceInput,
-                            unfocusedContainerColor = SurfaceInput,
-                            cursorColor = categoryColor,
+                            focusedBorderColor = color, unfocusedBorderColor = SurfaceCardLight,
+                            focusedContainerColor = SurfaceInput, unfocusedContainerColor = SurfaceInput, cursorColor = color
                         ),
-                        singleLine = true,
+                        singleLine = true
                     )
                     Spacer(Modifier.height(8.dp))
                 }
             } else {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceCard)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.Info, null, tint = Cyan)
-                        Spacer(Modifier.width(12.dp))
-                        Text("No parameters required", color = TextSecondary)
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = SurfaceCard)) {
+                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.Info, null, tint = Cyan); Spacer(Modifier.width(10.dp)); Text("No parameters required", color = TextSecondary)
                     }
                 }
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
             }
 
-            // Execute button
             Button(
-                onClick = onExecute,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                enabled = state?.isLoading != true,
+                onClick = onExec, modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = result?.loading != true,
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = categoryColor)
+                colors = ButtonDefaults.buttonColors(containerColor = color)
             ) {
-                if (state?.isLoading == true) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = TextPrimary,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Loading...", color = TextPrimary)
+                if (result?.loading == true) {
+                    CircularProgressIndicator(Modifier.size(18.dp), color = TextPrimary, strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp)); Text("Loading...", color = TextPrimary)
                 } else {
-                    Icon(Icons.Filled.PlayArrow, null, tint = TextPrimary)
-                    Spacer(Modifier.width(8.dp))
+                    Icon(Icons.Filled.PlayArrow, null, tint = TextPrimary); Spacer(Modifier.width(8.dp))
                     Text("Execute", color = TextPrimary, fontWeight = FontWeight.SemiBold)
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
-
-            // Response
-            if (state?.response != null || state?.error != null) {
-                Text("Response", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                Spacer(Modifier.height(12.dp))
-
+            if (result?.body != null || result?.error != null) {
+                Spacer(Modifier.height(18.dp))
+                Text("Response", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                Spacer(Modifier.height(10.dp))
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (state.isSuccess) Green.copy(alpha = 0.1f) else Orange.copy(alpha = 0.1f)
-                    )
+                    colors = CardDefaults.cardColors(containerColor = if (result.success) Green.copy(alpha = 0.08f) else Orange.copy(alpha = 0.08f))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        // Status badge
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(
-                                        if (state.isSuccess) Green.copy(alpha = 0.2f) else Orange.copy(alpha = 0.2f)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    if (state.isSuccess) "200 OK" else "ERROR",
-                                    color = if (state.isSuccess) Green else Orange,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                    Column(Modifier.padding(14.dp)) {
+                        Box(Modifier.clip(RoundedCornerShape(6.dp)).background(if (result.success) Green.copy(alpha = 0.2f) else Orange.copy(alpha = 0.2f)).padding(horizontal = 8.dp, vertical = 4.dp)) {
+                            Text(if (result.success) "200 OK" else "ERROR", color = if (result.success) Green else Orange, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         }
-                        Spacer(Modifier.height(12.dp))
-
-                        // JSON Response
+                        Spacer(Modifier.height(10.dp))
                         SelectionContainer {
                             Text(
-                                text = state.response ?: state.error ?: "",
-                                color = if (state.isSuccess) TextPrimary else Orange,
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace,
-                                lineHeight = 18.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(SurfaceCard.copy(alpha = 0.5f))
-                                    .padding(12.dp)
+                                text = result.body ?: result.error ?: "",
+                                color = if (result.success) TextPrimary else Orange,
+                                fontSize = 12.sp, fontFamily = FontFamily.Monospace, lineHeight = 18.sp,
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(SurfaceCard.copy(alpha = 0.5f)).padding(12.dp)
                             )
                         }
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
