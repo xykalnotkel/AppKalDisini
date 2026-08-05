@@ -112,12 +112,12 @@ fun formatTime(s: Float) = "%02d:%02d.%02d".format((s / 60).toInt(), (s % 60).to
 }
 
 @Composable fun TimelinePanel(tracks: List<Track>, dur: Float, time: Float, selId: String?, modifier: Modifier, onLayerClick: (String) -> Unit) {
-    val pps = 60f; val tw = (dur * pps).dp; val px = (time * pps).dp
+    import androidx.compose.ui.unit.Dp; val pps: Float = 60f; val tw: Dp = (dur * pps).dp; val px: Dp = (time * pps).dp
     Surface(color = Color(0xFF18181E), modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(22.dp).background(Color(0xFF202028))) {
-                Row(Modifier.horizontalScroll(rememberScrollState())) { for (i in 0..dur.toInt()) Text("${i}s", color = Color(0xFF4A4A50), fontSize = 7.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.width(pps.dp).padding(start = 1.dp)) }
-                Box(Modifier.offset(x = px.dp).width(2.dp).fillMaxHeight().background(Color(0xFFFF4444)))
+                Row(Modifier.horizontalScroll(rememberScrollState())) { for (i in 0..dur.toInt()) Text("${i}s", color = Color(0xFF4A4A50), fontSize = 7.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.width((pps).dp).padding(start = 1.dp)) }
+                Box(Modifier.offset(x = px).width(2.dp).fillMaxHeight().background(Color(0xFFFF4444)))
             }
             LazyColumn { items(tracks) { t ->
                 Box(Modifier.fillMaxWidth().height(48.dp).background(if (tracks.indexOf(t) % 2 == 0) Color(0xFF14141A) else Color(0xFF1A1A20))) {
@@ -127,9 +127,9 @@ fun formatTime(s: Float) = "%02d:%02d.%02d".format((s / 60).toInt(), (s % 60).to
                             val clr = when (l) { is VideoLayer -> Color(0xFF4455FF); is ImageLayer -> Color(0xFF44AA44); is TextLayer -> Color(0xFFDDDD44); is ShapeLayer -> Color(0xFFDD4444); is NullLayer -> Color(0xFF888888); is CameraLayer -> Color(0xFF44FFFF); else -> Color.Gray }
                             Box(Modifier.offset(x = (l.startTime * pps).dp).width((l.duration * pps).dp).height(36.dp).padding(vertical = 3.dp).clip(RoundedCornerShape(3.dp)).background(clr.copy(alpha = if (l.id == selId) 0.9f else 0.45f)).border(1.dp, if (l.id == selId) Color.White else Color.Transparent, RoundedCornerShape(3.dp)).clickable { onLayerClick(l.id) }.padding(horizontal = 5.dp), contentAlignment = Alignment.CenterStart) { Text(l.name, color = Color.White, fontSize = 9.sp, maxLines = 1, fontFamily = FontFamily.Monospace) }
                         }
-                        Spacer(Modifier.width(tw.dp))
+                        Spacer(Modifier.width(tw))
                     }
-                    Box(Modifier.offset(x = px.dp).width(2.dp).fillMaxHeight().background(Color(0xFFFF4444)))
+                    Box(Modifier.offset(x = px).width(2.dp).fillMaxHeight().background(Color(0xFFFF4444)))
                 }
             } }
         }
