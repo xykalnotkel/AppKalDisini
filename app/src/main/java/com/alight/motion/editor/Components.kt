@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Dp
 import com.alight.motion.model.*
 import kotlinx.coroutines.*
 
@@ -112,7 +113,7 @@ fun formatTime(s: Float) = "%02d:%02d.%02d".format((s / 60).toInt(), (s % 60).to
 }
 
 @Composable fun TimelinePanel(tracks: List<Track>, dur: Float, time: Float, selId: String?, modifier: Modifier, onLayerClick: (String) -> Unit) {
-    import androidx.compose.ui.unit.Dp; val pps: Float = 60f; val tw: Dp = (dur * pps).dp; val px: Dp = (time * pps).dp
+    val pps: Float = 60f; val tw = (dur * pps).dp; val px = (time * pps).dp
     Surface(color = Color(0xFF18181E), modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(22.dp).background(Color(0xFF202028))) {
