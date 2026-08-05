@@ -103,11 +103,11 @@ fun formatTime(s: Float) = "%02d:%02d.%02d".format((s / 60).toInt(), (s % 60).to
     var q by remember { mutableIntStateOf(90) }
     Text("EXPORT", color = Color(0xFFB0B0B8), fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, letterSpacing = 2.sp); Spacer(Modifier.height(10.dp))
     Text("Format", color = Color(0xFF5A5A60), fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) { ExportFormat.entries.forEach { f -> FilterChip(fmt == f, { fmt = f }, { Text(f.name, fontSize = 10.sp, fontFamily = FontFamily.Monospace) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF3A3A50))) } }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) { ExportFormat.entries.forEach { f -> fmt == f, { fmt = f }, { Text(f.name, fontSize = 10.sp, fontFamily = FontFamily.Monospace) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF3A3A50))) } }
     Spacer(Modifier.height(6.dp)); Text("Resolution", color = Color(0xFF5A5A60), fontSize = 9.sp, fontFamily = FontFamily.Monospace)
     LazyColumn(Modifier.height(80.dp)) { items(ResolutionPreset.ALL) { r -> Text("${r.name} (${r.w}x${r.h})", color = if (w == r.w && h == r.h) Color.White else Color(0xFF6A6A70), fontSize = 10.sp, modifier = Modifier.clickable { w = r.w; h = r.h }.padding(vertical = 2.dp)) } }
     Text("FPS", color = Color(0xFF5A5A60), fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-    Row(Modifier.fillMaxWidth()) { ALL_FPS.take(7).forEach { f -> FilterChip(fps == f, { fps = f }, { Text("$f", fontSize = 9.sp, fontFamily = FontFamily.Monospace) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF3A3A50)), modifier = Modifier.padding(1.dp)) } }
+    Row(Modifier.fillMaxWidth()) { ALL_FPS.take(7).forEach { f -> fps == f, { fps = f }, { Text("$f", fontSize = 9.sp, fontFamily = FontFamily.Monospace) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF3A3A50)), modifier = Modifier.padding(1.dp)) } }
     Spacer(Modifier.height(10.dp)); Button(onExport, Modifier.fillMaxWidth().height(40.dp), shape = RoundedCornerShape(6.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C9CFF))) { Icon(Icons.Filled.FileDownload, null, modifier = Modifier.size(14.dp)); Spacer(Modifier.width(4.dp)); Text("EXPORT ${fmt.name}", fontSize = 11.sp, fontFamily = FontFamily.Monospace, letterSpacing = 2.sp) }
 }
 
@@ -155,7 +155,7 @@ fun formatTime(s: Float) = "%02d:%02d.%02d".format((s / 60).toInt(), (s % 60).to
             Text("Resolution:", color = Color(0xFF5A5A60), fontSize = 9.sp, fontFamily = FontFamily.Monospace); Spacer(Modifier.height(4.dp))
             LazyColumn(Modifier.height(120.dp)) { items(ResolutionPreset.ALL) { r -> Text("${r.name} (${r.w}x${r.h})", color = if (project.width == r.w && project.height == r.h) Color(0xFF5C9CFF) else Color(0xFF777780), fontSize = 10.sp, modifier = Modifier.clickable { project.width = r.w; project.height = r.h; onDismiss() }.padding(vertical = 2.dp)) } }
             Spacer(Modifier.height(8.dp)); Text("FPS: ${project.fps}", color = Color(0xFF777780), fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-            Row(Modifier.fillMaxWidth()) { ALL_FPS.forEach { f -> FilterChip(project.fps == f, { project.fps = f }, { Text("$f", fontSize = 9.sp, fontFamily = FontFamily.Monospace) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF3A3A50)), modifier = Modifier.padding(1.dp)) } }
+            Row(Modifier.fillMaxWidth()) { ALL_FPS.forEach { f -> project.fps == f, { project.fps = f }, { Text("$f", fontSize = 9.sp, fontFamily = FontFamily.Monospace) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF3A3A50)), modifier = Modifier.padding(1.dp)) } }
         }
     }, confirmButton = { TextButton(onDismiss) { Text("OK") } }, containerColor = Color(0xFF202025))
 }
