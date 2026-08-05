@@ -2,7 +2,7 @@ plugins {
     id("com.android.application");id("org.jetbrains.kotlin.android");id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
-    namespace="com.alight.motion";compileSdk=35;ndkVersion="27.0.12077973"
+    namespace="com.alight.motion";compileSdk=35
     defaultConfig {
         applicationId="com.alight.motion.editor";minSdk=26;targetSdk=35;versionCode=2;versionName="2.0.0"
         ndk{abiFilters+=listOf("arm64-v8a","armeabi-v7a","x86_64")}

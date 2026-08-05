@@ -12,15 +12,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: "17"
+          java-version: '17'
           distribution: temurin
       - uses: android-actions/setup-android@v3
         with:
           api-level: 35
-          build-tools: 35.0.0
-          ndk-version: 27.0.12077973
+          build-tools: '35.0.0'
       - uses: gradle/actions/setup-gradle@v3
-      - run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties && echo "ndk.dir=$ANDROID_NDK_HOME" >> local.properties
+      - run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
       - run: gradle assembleDebug --no-daemon
       - uses: softprops/action-gh-release@v2
         with:
