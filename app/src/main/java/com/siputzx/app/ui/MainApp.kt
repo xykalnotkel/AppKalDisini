@@ -5,6 +5,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -113,7 +114,7 @@ fun MainApp() {
             when (val s = screen) {
                 is S.Home -> {
                     val cats = specData!!.map { Cat(it.key, formatTag(it.key), it.value.size) }
-                    HomeScreen(cats, specData!!.values.sumOf { it.size }) { screen = S.Category(it.key, it.name) }
+                    HomeScreen(cats, specData!!.values.sumOf { it.size }) { screen = S.Category(it.tag, it.name) }
                 }
                 is S.Category -> {
                     val eps = specData!![s.tag] ?: emptyList()
