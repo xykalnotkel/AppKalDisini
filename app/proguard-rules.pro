@@ -1,0 +1,4 @@
+-keep class com.alight.motion.** { *; }
+-keepclassmembers class com.alight.motion.** { *; }
+-keep class kotlinx.serialization.** { *; }
+-dontwarn okhttp3.**
