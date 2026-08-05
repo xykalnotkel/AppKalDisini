@@ -1,44 +1,306 @@
 package com.alight.motion.model
+
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
-@Serializable data class Project(val id:String=uuid(),var name:String="Untitled",var width:Int=1920,var height:Int=1080,var fps:Int=30,var duration:Float=10f,var bgColor:Long=0xFF000000,var tracks:MutableList<Track>= mutableListOf(),var audioClips:MutableList<AudioClip> = mutableListOf())
-@Serializable data class ProjectMeta(val author:String="",val created:Long=System.currentTimeMillis(),val modified:Long=System.currentTimeMillis())
-@Serializable data class Track(val id:String=uuid(),var name:String="Track",var isLocked:Boolean=false,var isVisible:Boolean=true,var isCollapsed:Boolean=false,var layers:MutableList<Layer> = mutableListOf())
-@Serializable data class AudioClip(val id:String=uuid(),var name:String="Audio",var sourceUri:String="",var startTime:Float=0f,var volume:Float=1f,var isMuted:Boolean=false,var trimStart:Float=0f,var trimEnd:Float=0f,var speed:Float=1f)
-@Serializable sealed class Layer {abstract val id:String;abstract var name:String;abstract var startTime:Float;abstract var duration:Float;abstract var transform:Transform;abstract var opacity:Float;abstract var blending:BlendingMode;abstract var effects:MutableList<Effect>;abstract var keyframes:MutableList<Keyframe>;abstract var isVisible:Boolean;abstract var parentId:String?;abstract var mask:MaskData?}
-@Serializable data class VideoLayer(override val id:String=uuid(),override var name:String="Video",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var sourceUri:String="",var trimStart:Float=0f,var speed:Float=1f,var volume:Float=1f):Layer()
-@Serializable data class ImageLayer(override val id:String=uuid(),override var name:String="Image",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var sourceUri:String=""):Layer()
-@Serializable data class TextLayer(override val id:String=uuid(),override var name:String="Text",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var text:String="Hello",var fontSize:Float=48f,var fontColor:Long=0xFFFFFFFF,var fontFamily:String="default",var textAlign:TextAlign=TextAlign.CENTER,var fontWeight:Float=400f,var letterSpacing:Float=0f,var lineHeight:Float=1.2f,var strokeWidth:Float=0f,var strokeColor:Long=0xFF000000):Layer()
-@Serializable data class ShapeLayer(override val id:String=uuid(),override var name:String="Shape",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var shapeType:ShapeType=ShapeType.RECT,var fillColor:Long=0xFFFF4444,var strokeColor:Long=0xFFFFFFFF,var strokeWidth:Float=0f,var cornerRadius:Float=0f,var polygonSides:Int=5,var starInnerRatio:Float=0.5f,var svgPathData:String="",var pathPoints:MutableList<PathPoint> = mutableListOf()):Layer()
-@Serializable data class NullLayer(override val id:String=uuid(),override var name:String="Null",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null):Layer()
-@Serializable data class CameraLayer(override val id:String=uuid(),override var name:String="Camera",override var startTime:Float=0f,override var duration:Float=10f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var zoom:Float=1f,var focus:Float=100f,var aperture:Float=2.8f):Layer()
-@Serializable data class AdjustmentLayer(override val id:String=uuid(),override var name:String="Adjustment",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null):Layer()
-@Serializable data class GroupLayer(override val id:String=uuid(),override var name:String="Group",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.PASS_THROUGH,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var children:MutableList<Layer> = mutableListOf()):Layer()
-@Serializable data class FigmaLayer(override val id:String=uuid(),override var name:String="Figma",override var startTime:Float=0f,override var duration:Float=5f,override var transform:Transform=Transform(),override var opacity:Float=1f,override var blending:BlendingMode=BlendingMode.NORMAL,override var effects:MutableList<Effect> = mutableListOf(),override var keyframes:MutableList<Keyframe> = mutableListOf(),override var isVisible:Boolean=true,override var parentId:String?=null,override var mask:MaskData?=null,var figmaNodeId:String="",var figmaFileId:String=""):Layer()
+fun uuid() = UUID.randomUUID().toString()
 
-@Serializable data class Transform(var posX:Float=960f,var posY:Float=540f,var scaleX:Float=1f,var scaleY:Float=1f,var rotation:Float=0f,var anchorX:Float=0.5f,var anchorY:Float=0.5f)
-@Serializable data class Keyframe(val id:String=uuid(),var time:Float,var property:KeyframeProperty,var value:Float,var easing:EasingType=EasingType.LINEAR)
-@Serializable data class Effect(val id:String=uuid(),var type:EffectType,var enabled:Boolean=true,var params:MutableMap<String,Float> = mutableMapOf())
-@Serializable data class MaskData(var type:MaskType=MaskType.ALPHA,var shapeType:ShapeType=ShapeType.RECT,var pathData:String="",var inverted:Boolean=false,var feather:Float=0f)
-@Serializable data class PathPoint(var x:Float,var y:Float,var type:PointType=PointType.CORNER)
-@Serializable data class ExportSettings(var format:ExportFormat=ExportFormat.MP4,var width:Int=1920,var height:Int=1080,var fps:Int=30,var bitrate:Float=16f,var codec:VideoCodec=VideoCodec.H264,var quality:Int=90,var outputPath:String="")
+@Serializable
+data class Project(
+    val id: String = uuid(),
+    var name: String = "Untitled",
+    var width: Int = 1920,
+    var height: Int = 1080,
+    var fps: Int = 30,
+    var duration: Float = 10f,
+    var bgColor: Long = 0xFF000000,
+    var tracks: MutableList<Track> = mutableListOf(),
+    var audioClips: MutableList<AudioClip> = mutableListOf()
+)
 
-@Serializable enum class KeyframeProperty{POS_X,POS_Y,SCALE_X,SCALE_Y,ROTATION,OPACITY,SKEW_X,SKEW_Y,SPEED,VOLUME,ZOOM,FOCUS}
-@Serializable enum class EasingType(val label:String){LINEAR("Linear"),EASE_IN("Ease In"),EASE_OUT("Ease Out"),EASE_IN_OUT("In Out"),BOUNCE("Bounce"),ELASTIC("Elastic"),BACK_IN("Back In"),BACK_OUT("Back Out")}
-@Serializable enum class EffectType(val label:String,val cat:EffectCat){BLUR("Gaussian Blur",EffectCat.BLUR),MOTION_BLUR("Motion Blur",EffectCat.BLUR),GLOW("Glow",EffectCat.STYLIZE),DROP_SHADOW("Drop Shadow",EffectCat.STYLIZE),SATURATION("Saturation",EffectCat.COLOR),BRIGHTNESS("Brightness",EffectCat.COLOR),CONTRAST("Contrast",EffectCat.COLOR),TEMPERATURE("Temperature",EffectCat.COLOR),VIBRANCE("Vibrance",EffectCat.COLOR),EXPOSURE("Exposure",EffectCat.COLOR),HUE("Hue Shift",EffectCat.COLOR),GRADIENT_MAP("Gradient Map",EffectCat.COLOR),CHROMA_KEY("Chroma Key",EffectCat.KEYING),FISHEYE("Fisheye",EffectCat.DISTORT),TWIRL("Twirl",EffectCat.DISTORT),WAVE("Wave",EffectCat.DISTORT),NOISE("Noise",EffectCat.GRAIN),VIGNETTE("Vignette",EffectCat.DISTORT),SHARPEN("Sharpen",EffectCat.STYLIZE),PIXELATE("Pixelate",EffectCat.STYLIZE),POSTERIZE("Posterize",EffectCat.COLOR),THRESHOLD("Threshold",EffectCat.COLOR),INVERT("Invert",EffectCat.COLOR),HALFTONE("Halftone",EffectCat.STYLIZE),EDGE_GLOW("Edge Glow",EffectCat.STYLIZE),CRYSTALLIZE("Crystallize",EffectCat.STYLIZE)}
-@Serializable enum class EffectCat{BLUR,COLOR,STYLIZE,DISTORT,KEYING,GRAIN}
-@Serializable enum class BlendingMode(val label:String){NORMAL("Normal"),DARKEN("Darken"),MULTIPLY("Multiply"),SCREEN("Screen"),OVERLAY("Overlay"),SOFT_LIGHT("Soft Light"),HARD_LIGHT("Hard Light"),DIFFERENCE("Difference"),ADD("Add"),SUBTRACT("Subtract"),PASS_THROUGH("Pass Through")}
-@Serializable enum class ShapeType{RECT,CIRCLE,TRIANGLE,STAR,POLYGON,LINE,ELLIPSE,SVG_PATH,PEN_PATH}
-@Serializable enum class TextAlign{LEFT,CENTER,RIGHT,JUSTIFY}
-@Serializable enum class MaskType{ALPHA,SHAPE,PATH}
-@Serializable enum class PointType{CORNER,SMOOTH,BEZIER}
-@Serializable enum class ExportFormat{MP4,GIF,PNG_SEQUENCE,WEBM}
-@Serializable enum class VideoCodec{H264,H265,VP8,VP9}
+@Serializable
+data class Track(
+    val id: String = uuid(),
+    var name: String = "Track",
+    var isLocked: Boolean = false,
+    var isVisible: Boolean = true,
+    var layers: MutableList<Layer> = mutableListOf()
+)
 
-data class ResolutionPreset(val name:String,val w:Int,val h:Int){
-    companion object{val ALL= listOf(ResolutionPreset("144p",256,144),ResolutionPreset("240p",426,240),ResolutionPreset("360p",640,360),ResolutionPreset("480p",854,480),ResolutionPreset("720p",1280,720),ResolutionPreset("1080p",1920,1080),ResolutionPreset("1440p",2560,1440),ResolutionPreset("4K",3840,2160),ResolutionPreset("1:1",1080,1080),ResolutionPreset("4:3",1440,1080),ResolutionPreset("9:16",1080,1920),ResolutionPreset("21:9",2560,1080))}
+@Serializable
+data class AudioClip(
+    val id: String = uuid(),
+    var name: String = "Audio",
+    var sourceUri: String = "",
+    var startTime: Float = 0f,
+    var volume: Float = 1f,
+    var isMuted: Boolean = false
+)
+
+@Serializable
+sealed class Layer {
+    abstract val id: String
+    abstract var name: String
+    abstract var startTime: Float
+    abstract var duration: Float
+    abstract var transform: Transform
+    abstract var opacity: Float
+    abstract var blending: BlendingMode
+    abstract var effects: MutableList<Effect>
+    abstract var keyframes: MutableList<Keyframe>
+    abstract var isVisible: Boolean
+    abstract var parentId: String?
+    abstract var mask: MaskData?
 }
-val ALL_FPS= listOf(1,5,10,12,15,24,25,30,48,50,60,120,240)
-val IMPORT_FORMATS= setOf("png","jpg","jpeg","mp4","webm","svg","gif","webp","bmp","heic","heif","tiff","eps","ai","psd","mov","mkv","avi","wav","mp3","aac","ogg","flac","m4a","aiff")
-fun uuid()=UUID.randomUUID().toString()
+
+@Serializable
+data class VideoLayer(
+    override val id: String = uuid(),
+    override var name: String = "Video",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null,
+    var sourceUri: String = "",
+    var speed: Float = 1f,
+    var volume: Float = 1f
+) : Layer()
+
+@Serializable
+data class ImageLayer(
+    override val id: String = uuid(),
+    override var name: String = "Image",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null,
+    var sourceUri: String = ""
+) : Layer()
+
+@Serializable
+data class TextLayer(
+    override val id: String = uuid(),
+    override var name: String = "Text",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null,
+    var text: String = "Hello",
+    var fontSize: Float = 48f,
+    var fontColor: Long = 0xFFFFFFFF,
+    var fontFamily: String = "default",
+    var textAlign: TextAlign = TextAlign.CENTER,
+    var strokeWidth: Float = 0f,
+    var strokeColor: Long = 0xFF000000
+) : Layer()
+
+@Serializable
+data class ShapeLayer(
+    override val id: String = uuid(),
+    override var name: String = "Shape",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null,
+    var shapeType: ShapeType = ShapeType.RECT,
+    var fillColor: Long = 0xFFFF4444,
+    var strokeColor: Long = 0xFFFFFFFF,
+    var strokeWidth: Float = 0f,
+    var cornerRadius: Float = 0f,
+    var svgPathData: String = ""
+) : Layer()
+
+@Serializable
+data class NullLayer(
+    override val id: String = uuid(),
+    override var name: String = "Null",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null
+) : Layer()
+
+@Serializable
+data class CameraLayer(
+    override val id: String = uuid(),
+    override var name: String = "Camera",
+    override var startTime: Float = 0f,
+    override var duration: Float = 10f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null,
+    var zoom: Float = 1f,
+    var focus: Float = 100f
+) : Layer()
+
+@Serializable
+data class AdjustmentLayer(
+    override val id: String = uuid(),
+    override var name: String = "Adjustment",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null
+) : Layer()
+
+@Serializable
+data class GroupLayer(
+    override val id: String = uuid(),
+    override var name: String = "Group",
+    override var startTime: Float = 0f,
+    override var duration: Float = 5f,
+    override var transform: Transform = Transform(),
+    override var opacity: Float = 1f,
+    override var blending: BlendingMode = BlendingMode.NORMAL,
+    override var effects: MutableList<Effect> = mutableListOf(),
+    override var keyframes: MutableList<Keyframe> = mutableListOf(),
+    override var isVisible: Boolean = true,
+    override var parentId: String? = null,
+    override var mask: MaskData? = null,
+    var children: MutableList<Layer> = mutableListOf()
+) : Layer()
+
+@Serializable
+data class Transform(
+    var posX: Float = 960f,
+    var posY: Float = 540f,
+    var scaleX: Float = 1f,
+    var scaleY: Float = 1f,
+    var rotation: Float = 0f
+)
+
+@Serializable
+data class Keyframe(
+    val id: String = uuid(),
+    var time: Float,
+    var property: KeyframeProperty,
+    var value: Float,
+    var easing: EasingType = EasingType.LINEAR
+)
+
+@Serializable
+data class Effect(
+    val id: String = uuid(),
+    var type: EffectType,
+    var enabled: Boolean = true,
+    var params: MutableMap<String, Float> = mutableMapOf()
+)
+
+@Serializable
+data class MaskData(
+    var type: MaskType = MaskType.ALPHA,
+    var feather: Float = 0f,
+    var inverted: Boolean = false
+)
+
+@Serializable
+data class ExportSettings(
+    var format: ExportFormat = ExportFormat.MP4,
+    var width: Int = 1920,
+    var height: Int = 1080,
+    var fps: Int = 30,
+    var bitrate: Float = 16f,
+    var codec: VideoCodec = VideoCodec.H264,
+    var quality: Int = 90,
+    var outputPath: String = ""
+)
+
+data class ResolutionPreset(val name: String, val w: Int, val h: Int) {
+    companion object {
+        val ALL = listOf(
+            ResolutionPreset("144p", 256, 144),
+            ResolutionPreset("240p", 426, 240),
+            ResolutionPreset("360p", 640, 360),
+            ResolutionPreset("480p", 854, 480),
+            ResolutionPreset("720p", 1280, 720),
+            ResolutionPreset("1080p", 1920, 1080),
+            ResolutionPreset("1440p", 2560, 1440),
+            ResolutionPreset("4K", 3840, 2160),
+            ResolutionPreset("1:1", 1080, 1080),
+            ResolutionPreset("9:16", 1080, 1920),
+            ResolutionPreset("21:9", 2560, 1080)
+        )
+    }
+}
+
+val ALL_FPS = listOf(1, 5, 10, 12, 15, 24, 25, 30, 48, 50, 60, 120, 240)
+val IMPORT_FORMATS = setOf("png", "jpg", "jpeg", "mp4", "webm", "svg", "gif", "webp", "bmp", "mov", "mkv", "avi", "wav", "mp3", "aac", "ogg", "flac")
+
+@Serializable enum class KeyframeProperty { POS_X, POS_Y, SCALE_X, SCALE_Y, ROTATION, OPACITY }
+@Serializable enum class EasingType(val label: String) {
+    LINEAR("Linear"), EASE_IN("Ease In"), EASE_OUT("Ease Out"),
+    EASE_IN_OUT("In Out"), BOUNCE("Bounce"), ELASTIC("Elastic"),
+    BACK_IN("Back In"), BACK_OUT("Back Out")
+}
+@Serializable enum class EffectType(val label: String, val cat: EffectCat) {
+    BLUR("Blur", EffectCat.BLUR), GLOW("Glow", EffectCat.STYLIZE),
+    DROP_SHADOW("Drop Shadow", EffectCat.STYLIZE),
+    SATURATION("Saturation", EffectCat.COLOR),
+    BRIGHTNESS("Brightness", EffectCat.COLOR),
+    CONTRAST("Contrast", EffectCat.COLOR),
+    TEMPERATURE("Temperature", EffectCat.COLOR),
+    CHROMA_KEY("Chroma Key", EffectCat.KEYING),
+    FISHEYE("Fisheye", EffectCat.DISTORT),
+    TWIRL("Twirl", EffectCat.DISTORT),
+    NOISE("Noise", EffectCat.GRAIN),
+    VIGNETTE("Vignette", EffectCat.DISTORT),
+    SHARPEN("Sharpen", EffectCat.STYLIZE),
+    PIXELATE("Pixelate", EffectCat.STYLIZE),
+    INVERT("Invert", EffectCat.COLOR),
+    HALFTONE("Halftone", EffectCat.STYLIZE),
+    MOTION_BLUR("Motion Blur", EffectCat.BLUR),
+    EDGE_GLOW("Edge Glow", EffectCat.STYLIZE),
+    CRYSTALLIZE("Crystallize", EffectCat.STYLIZE)
+}
+@Serializable enum class EffectCat { BLUR, COLOR, STYLIZE, DISTORT, KEYING, GRAIN }
+@Serializable enum class BlendingMode(val label: String) {
+    NORMAL("Normal"), DARKEN("Darken"), MULTIPLY("Multiply"),
+    SCREEN("Screen"), OVERLAY("Overlay"), ADD("Add"),
+    DIFFERENCE("Difference")
+}
+@Serializable enum class ShapeType { RECT, CIRCLE, TRIANGLE, STAR, POLYGON, LINE, SVG_PATH }
+@Serializable enum class TextAlign { LEFT, CENTER, RIGHT }
+@Serializable enum class MaskType { ALPHA, SHAPE, PATH }
+@Serializable enum class ExportFormat { MP4, GIF, PNG_SEQUENCE, WEBM }
+@Serializable enum class VideoCodec { H264, H265, VP8, VP9 }
