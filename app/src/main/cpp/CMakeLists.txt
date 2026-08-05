@@ -13,13 +13,7 @@ find_library(mediandk-lib mediandk)
 set(CORE_SOURCES
     jni_bridge.cpp
     gl/renderer.cpp
-    gl/shaders.cpp
     effects/pipeline.cpp
-    particles/engine.cpp
-    figma/parser.cpp
-    audio/processor.cpp
-    media/decoder.cpp
-    font/sdf_renderer.cpp
 )
 
 add_library(alightmotion SHARED ${CORE_SOURCES})
@@ -40,4 +34,4 @@ target_link_libraries(alightmotion
     ${OpenSLES-lib} ${jnigraphics-lib} ${mediandk-lib}
 )
 
-target_compile_options(alightmotion PRIVATE -O3 -ffast-math -funroll-loops -fomit-frame-pointer)
+target_compile_options(alightmotion PRIVATE -O3 -ffast-math -funroll-loops)
